@@ -32,7 +32,7 @@ function LeakSensorAccessory(log, config) {
       this.log('No Leak File ' + this.noleakfilepath);
   }
 
-  this.isWet = false;
+  this.LeakDetected = false;
   this.service = new Service.LeakSensor(this.name);
   setTimeout(this.monitorLeakState.bind(this), this.sensorPollInMs);
 }
