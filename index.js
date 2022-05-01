@@ -97,7 +97,7 @@ LeakSensorAccessory.prototype = {
 
       this.service
             .getCharacteristic(Characteristic.LeakDetected)
-            .on('get', this.LeakDetected.bind(this));
+            .on('get', this.getLeakSensorState.bind(this));
 
         this.service
             .getCharacteristic(Characteristic.Name)
