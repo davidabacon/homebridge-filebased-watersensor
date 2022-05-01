@@ -3,7 +3,6 @@ var Characteristic;
 var LeakState;
 var crypto = require("crypto");
 var fs = require('fs');
-var sn = "12345";
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -51,13 +50,13 @@ LeakSensorAccessory.prototype = {
     },
 
     isWet: function() {
-//        this.log("dry file path", this.noleakfilepath);
+        this.log("dry file path", this.noleakfilepath);
         if (!fs.existsSync(this.noleakfilepath) && !fs.existsSync(this.leakfilepath)) {
-//            this.log('Neither leak or noleak file exists, sensor is dry');
+            this.log('Neither leak nor noleak file exists, sensor is dry');
             return false;
         } else {
             if (!fs.existsSync(this.leakfilepath)) {
-//                this.log('There is no leak file, so sensor is dry');
+                this.log('There is no leak file, so sensor is dry');
                 return false;
             }else {
                 var statsLeak = fs.statSync(this.leakfilepath);
