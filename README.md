@@ -1,7 +1,7 @@
-# homebridge-filebased-contactsensor
-A filebased contact sensor for Homebridge
+# homebridge-filebased-watersensor
+A filebased leak sensor for Homebridge
 
-This plugin sensor monitors the modification time of an "open file" and a "closed file" to determine the state of a door.
+This plugin sensor monitors the modification time of an "leak file" and a "noleak file" to determine the state of a leak sensor.
 
 For background, this is my way of kludging together integration of a yolink door sensors into homekit.
 
@@ -18,19 +18,19 @@ Configure the plugin as follows:
 
 
       {
-            "name": "Patio Gate",
-            "openpath": "/yolink/devices/patiogate/open.txt",
-            "closedpath": "/yolink/devices/patiogate/closed.txt",
-            "accessory": "DoorSensor"
+            "name": "Dishwasher ",
+            "leakpath": "/yolink/devices/leaksensor/wet.txt",
+            "noleakpath": "/yolink/devices/leaksensor/dry.txt",
+            "accessory": "LeakSensor"
         }
         
         
 The logic works as follows:
 
-  * If neither the openpath or closedpath file exist, then the door is closed
-  * If only the open file exists, then the door is open
-  * If only the closed file exists, then the door is closed
-  * If both files exist, then compare the last modification time.  The most recently modified file reflects the current state of the door.
+  * If neither the leakpath nor noleakpath file exist, then the sensor is dry
+  * If only the leakpath file exists, then the sensor is wet
+  * If only the noleakpath file exists, then the sensor is dry
+  * If both files exist, then compare the last modification time.  The most recently modified file reflects the current state of the sensor.
 
 I poll the status of the files every 1/2 second.
 

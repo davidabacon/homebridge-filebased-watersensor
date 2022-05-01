@@ -1,13 +1,13 @@
 {
-    "name": "homebridge-filebased-contactsensor",
-    "description": "A filebased doorsensor",
-    "version": "0.0.34",
+    "name": "homebridge-filebased-watersensor",
+    "description": "A filebased water sensor",
+    "version": "0.0.1",
     "author": "David Bacon <david_a_bacon@yahoo.com>",
-    "homepage": "https://github.com/davidabacon/homebridge-filebased-contactsensor",
+    "homepage": "https://github.com/davidabacon/homebridge-filebased-watersensor",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/davidabacon/homebridge-filebasedcontactsensor.git"
+        "url": "https://github.com/davidabacon/homebridge-filebasedwatersensor.git"
     },
     "engines": {
         "node": ">=14.0.0",
@@ -15,9 +15,8 @@
     },
     "keywords": [
         "homebridge-plugin",
-        "contact sensor",
-        "door sensor",
-        "filebased door sensor"
+        "water sensor",
+        "filebased water sensor"
     ],
     "dependencies": {
         "debug": "^2.2.0",

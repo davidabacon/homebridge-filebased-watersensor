@@ -1,23 +1,23 @@
 var Service;
 var Characteristic;
-var DoorState;
+var LeakState;
 var crypto = require("crypto");
 var fs = require('fs');
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
-    DoorState = homebridge.hap.Characteristic.CurrentDoorState;
-    homebridge.registerAccessory("homebridge-filebased-contactsensor", "DoorSensor", DoorSensorAccessory);
+    LeakState = homebridge.hap.Characteristic.LeakDetected;
+    homebridge.registerAccessory("homebridge-filebased-watersensor", "LeakSensor", LeakSensorAccessory);
 
 };
 //constructor function
 
-function DoorSensorAccessory(log, config) {
+function LeakSensorAccessory(log, config) {
   this.log = log;
   this.name = config["name"];
-  this.openfilepath = config["openpath"];
-  this.closedfilepath = config["closedpath"];
+  this.leakfilepath = config["leakpath"];
+  this.noleakfilepath = config["noleakpath"];
   this.sensorPollInMs = 500;
 
   if(config["sn"]){
@@ -27,57 +27,57 @@ function DoorSensorAccessory(log, config) {
       shasum.update(this.openfilepath);
       this.sn = shasum.digest('base64');
       this.log('Computed SN ' + this.sn);
-      this.log('Open File ' + this.openfilepath );
-      this.log('Close File ' + this.closedfilepath);
+      this.log('Leak File ' + this.leakfilepath );
+      this.log('No Leak File ' + this.noleakfilepath);
   }
 
-  this.isClosed = true;
-  this.service = new Service.ContactSensor(this.name);
-  setTimeout(this.monitorDoorState.bind(this), this.sensorPollInMs);
+  this.isWet = false;
+  this.service = new Service.LeakSensor(this.name);
+  setTimeout(this.monitorLeakState.bind(this), this.sensorPollInMs);
 }
 
-DoorSensorAccessory.prototype = {
+LeakSensorAccessory.prototype = {
 
     identify: function(callback) {
         this.log("Identify requested");
         callback(null);
     },
 
-    monitorDoorState: function() {
-        this.isClosed = this.isDoorClosed();
-        this.service.getCharacteristic(Characteristic.ContactSensorState).setValue(this.isClosed);
-        setTimeout(this.monitorDoorState.bind(this), this.sensorPollInMs);
+    monitorLeakState: function() {
+        this.LeakDetected = this.isWet();
+        this.service.getCharacteristic(Characteristic.LeakDetected).setValue(this.LeakDetected);
+        setTimeout(this.monitorLeakState.bind(this), this.sensorPollInMs);
     },
 
-    isDoorClosed: function() {
-//        this.log("closed file path", this.closedfilepath);
-        if (!fs.existsSync(this.closedfilepath) && !fs.existsSync(this.openfilepath)) {
-//            this.log('Neither open or closed file exists');
-            return true;
+    isWet: function() {
+//        this.log("dry file path", this.noleakfilepath);
+        if (!fs.existsSync(this.noleakfilepath) && !fs.existsSync(this.leakfilepath)) {
+//            this.log('Neither leak or noleak file exists, sensor is dry');
+            return false;
         } else {
-            if (!fs.existsSync(this.openfilepath)) {
-//                this.log('There is no open file, so gate is closed');
-                return true;
+            if (!fs.existsSync(this.leakfilepath)) {
+//                this.log('There is no leak file, so sensor is dry');
+                return false;
             }else {
-                var statsOpen = fs.statSync(this.openfilepath);
-                var statsClosed = fs.statSync(this.closedfilepath);
-//                this.log('closed file mod time is ' + statsClosed.mtime);
-//                this.log('open file mod time is ' + statsOpen.mtime);
-                if (statsClosed.mtime <= statsOpen.mtime) {
-//                        this.log('Closed file is older than open file, door is open');
+                var statsLeak = fs.statSync(this.leakfilepath);
+                var statsNoLeak = fs.statSync(this.noleakfilepath);
+//                this.log('dry file mod time is ' + statsClosed.mtime);
+//                this.log('leak file mod time is ' + statsOpen.mtime);
+                if (statsNoLeak.mtime <= statsLeak.mtime) {
+//                        this.log('NoLeak file is older than Leak file, sensor is wet');
                         return true;
                 } else {
-//                    this.log('Open file is newer than closed file, the gate is open');
+//                    this.log('NoLeak file is newer than leak file, the sensor is dry');
                     return false;
                 }
             }
         }
     },
 
-    getContactSensorState: function(callback) {
-        this.isClosed = this.isDoorClosed();
- //       this.log("getConactSensorState: ", this.isClosed);
-        callback(null,this.isClosed);
+    getLeakSensorState: function(callback) {
+        this.LeakDetected = this.isWet();
+ //       this.log("getLeakSensor state: ", this.LeakDetected);
+        callback(null,this.LeakDetected);
     },
 
     getName: function(callback) {
@@ -91,12 +91,12 @@ DoorSensorAccessory.prototype = {
     informationService
       .setCharacteristic(Characteristic.Name, this.name)
       .setCharacteristic(Characteristic.Manufacturer, "Homebridge")
-      .setCharacteristic(Characteristic.Model, "Contact Sensor")
+      .setCharacteristic(Characteristic.Model, "Leak Sensor")
       .setCharacteristic(Characteristic.SerialNumber, this.sn);
 
       this.service
-            .getCharacteristic(Characteristic.ContactSensorState)
-            .on('get', this.getContactSensorState.bind(this));
+            .getCharacteristic(Characteristic.LeakDetected)
+            .on('get', this.LeakDetected.bind(this));
 
         this.service
             .getCharacteristic(Characteristic.Name)
