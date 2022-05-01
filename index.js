@@ -3,6 +3,7 @@ var Characteristic;
 var LeakState;
 var crypto = require("crypto");
 var fs = require('fs');
+var sn = "12345";
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -24,7 +25,7 @@ function LeakSensorAccessory(log, config) {
       this.sn = config["sn"];
   } else {
       var shasum = crypto.createHash('sha1');
-      shasum.update(this.openfilepath);
+      shasum.update(this.leakfilepath);
       this.sn = shasum.digest('base64');
       this.log('Computed SN ' + this.sn);
       this.log('Leak File ' + this.leakfilepath );
